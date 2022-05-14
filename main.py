@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-# Description: Define three main types of Chapter 13 creditor claims
+# Define secured creditor claim
 
 class secureddebtclaim:
     def __init__(self, name, amount, value, currentpayment, arrears, planrate, ninetenstatus):
@@ -13,18 +13,7 @@ class secureddebtclaim:
         self.planrate = float(planrate)
         self.ninetenstatus = str(ninetenstatus)
 
-class unsecuredpriorityclaim:
-    def __init__(self, name, amount):
-        self.name = str(name)
-        self.amount = float(amount)
-
-class generalunsecuredclaim:
-    def __init__(self, name, amount):
-        self.name = str(name)
-        self.amount = float(amount)
-
-# Description: Preliminary global variable instantiation and setting
-# Idea: Develop Schedule AB and C non-exempt equity calculator and incorporate
+# Preliminary global variable instantiation and setting
 
 abovemedian = str("False")
 commitmentperiod = int(36)
@@ -36,13 +25,13 @@ housevalue = float(0)
 car1 = secureddebtclaim(None, 0, 0, 0, 0, 0, "N")
 car2 = secureddebtclaim(None, 0, 0, 0, 0, 0, "N")
 
-# Description: Input gathering
-# Idea: Add additional logic to prevent TypeErrors
+# Input gathering
 
 county = str(input("Enter county of residence: "))
 householdsize = int(input("Enter household size: "))
 currentmonthlyincome = float(input("Enter current monthly income (Line 15b, Form 122C-1): $ "))
 housequery = str(input("Is there a house? (Y or N): "))
+
 if housequery == "Y":
     housevalue = float(input("Enter value of house: $ "))
     firstmortgagequery = str(input("Is there a first mortgage? (Y or N): "))
@@ -86,7 +75,9 @@ else:
     firstmortgage.currentpayment = 0
     secondmortgage.amount = 0
     secondmortgage.currentpayment = 0
+
 carclaimquery = int(input("How many cars with liens are there? (0, 1, or 2): "))
+
 if carclaimquery > 0:
     car1.name = str(input("Enter the name of Car #1 creditor: "))
     car1.amount = float(input("Enter the total amount owed on Car #1: $ "))
@@ -101,7 +92,9 @@ if carclaimquery > 0:
         car2.currentpayment = float(input("Enter amount of regular monthly payment on Car #2: $ "))
         car2.planrate = 0.0525
         car2.ninetenstatus = str(input("Is this a 910 car claim? (Y or N): "))
+
 carownedquery = int(input("How many cars without liens are there?: "))
+
 pmsiclaimsquery = int(input("Enter the total number of PMSI or other lien claims: "))
 pmsiclaimslist = []
 for claim in range(pmsiclaimsquery):
@@ -115,35 +108,37 @@ for claim in range(pmsiclaimsquery):
     claim = secureddebtclaim(creditorname, creditoramount, creditorvalue, creditorcurrentpayment,
                              creditorarrears, creditorplanrate, creditorninetenstatus)
     pmsiclaimslist.append(claim)
+
 unsecuredpriorityclaimsquery = int(input("Enter number of priority claims: "))
 unsecuredprioritysclaimslist = []
 for claim in range(unsecuredpriorityclaimsquery):
     creditorname = str(input("Enter name of priority creditor: "))
     creditoramount = float(input("Enter total amount of priority claim: $ "))
-    claim = unsecuredpriorityclaim(creditorname, creditoramount)
     unsecuredprioritysclaimslist.append(claim)
+
 income = float(input("Enter total income from Schedule I, Line 12: $ "))
 expenses = float(input("Enter total expenses from Schedule J, Line 22C: $ "))
+
 chapter7dividend = float(input("Enter total amount of hypothetical distribution in Chapter 7 case: $ "))
 toydividend = float(input("Enter total amount of toy dividend to be distributed pro rata: $ "))
 
-# Description: Function that defines the short-form means test logic
+# Function that defines the short-form means test logic
 
 def form122c1():
     global medianincome, abovemedian, householdsize, currentmonthlyincome
-    georgia0 = [None, float(53105), float(68295), float(76391), float(92286)]
+    georgia0 = [None, float(55600), float(71504), float(79980), float(96622)]
 
     if householdsize <= 4:
         medianincome = georgia0[householdsize]
     elif householdsize > 4:
-        medianincome = georgia0[4] + (9000 * (householdsize - 4))
+        medianincome = georgia0[4] + (9900 * (householdsize - 4))
 
     currentmonthlyincomecompare = float(currentmonthlyincome) * float(12)
 
     if currentmonthlyincomecompare > medianincome:
         abovemedian = "True"
 
-# Description: Function that defines the extra means test logic if debtor(s) is/are "above median"
+# Function that defines the extra means test logic if debtor(s) is/are "above median"
 
 def form122c2():
     global abovemedian, commitmentperiod, disposableincome, firstmortgage, secondmortgage, housevalue, car1, car2, householdsize, currentmonthlyincome
@@ -172,19 +167,19 @@ def form122c2():
     childsupport = float(input("Enter total amount received for child support each month: $ "))
     retirementcontributions = float(input("Enter amount of monthly retirement contributions + loan repayments: $ "))
 
-    georgia1 = [None, float(723), float(1292), float(1473), float(1740)]
+    georgia1 = [None, float(785), float(1410), float(1610), float(1900)]
     if householdsize <= 4:
         foodclothingandother = georgia1[householdsize]
     elif householdsize > 4:
-        foodclothingandother = georgia1[4] + (341 * (householdsize - 4))
+        foodclothingandother = georgia1[4] + (344 * (householdsize - 4))
 
     meanstestdeductions += foodclothingandother
 
-    oophealthcare += (housholdunder65 * 68) + (householdover65 * 142)
+    oophealthcare += (housholdunder65 * 75) + (householdover65 * 153)
 
     meanstestdeductions += float(oophealthcare)
 
-    r0 = requests.get('https://www.justice.gov/ust/eo/bapcpa/20210515/bci_data/housing_charts/irs_housing_charts_GA.htm')
+    r0 = requests.get('https://www.justice.gov/ust/eo/bapcpa/20220515/bci_data/housing_charts/irs_housing_charts_GA.htm')
     r1 = r0.text
     soup3 = BeautifulSoup(r1, 'html.parser')
     housingoperating0 = soup3.find("td", class_="hctablecellleft", string=county)
@@ -217,24 +212,24 @@ def form122c2():
 
     if carclaimquery or carownedquery == 1:
         if county == "Butts County" or "Jasper County" or "Lamar County" or "Morgan County" or "Walton County":
-            meanstestdeductions += 251
+            meanstestdeductions += 320
         else:
-            meanstestdeductions += 224
+            meanstestdeductions += 242
     elif carclaimquery or carownedquery == 2:
         if county == "Butts County" or "Jasper County" or "Lamar County" or "Morgan County" or "Walton County":
-            meanstestdeductions += 502
+            meanstestdeductions += 640
         else:
-            meanstestdeductions += 448
+            meanstestdeductions += 584
     if carclaimquery or carownedquery == 1:
         claimedcar1 = float(533) - car1.currentpayment
         if claimedcar1 < 0:
             claimedcar1 = 0
         meanstestdeductions += claimedcar1
     if carclaimquery or carownedquery == 2:
-        claimedcar1 = float(533) - car1.currentpayment
+        claimedcar1 = float(588) - car1.currentpayment
         if claimedcar1 < 0:
             claimedcar1 = 0
-        claimedcar2 = float(533) - car2.currentpayment
+        claimedcar2 = float(588) - car2.currentpayment
         if claimedcar2 < 0:
             claimedcar2 = 0
         meanstestdeductions += (claimedcar1 + claimedcar2)
